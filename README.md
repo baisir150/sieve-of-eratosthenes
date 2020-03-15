@@ -8,5 +8,13 @@ Modifying the parallel Sieve of Eratosthenes to find primes numbers more efficie
 3. Each process find its own sieving primes via local computations (not broadcasts)
 4. More effective use of caches
 
-## Instructions
-Use the command `make` to start up the command line interface and follow directions to test different algorithsm.
+## Instruction
+| **Command**                        | **Description**                      |
+|------------------------------------|--------------------------------------|
+| `make`                             | compile                              |
+| `make clean`                       | remove outputted files               |
+| `make test`                        | execute cli                          |
+| `make valgrind`                    | cun valgrind for memory management   |
+
+<hr>
+<p align="center">&copy; Namito Yokota</p>
