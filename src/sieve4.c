@@ -1,6 +1,6 @@
-#include "sieve4.h"
+#include "../lib/sieve4.h"
 
-void sieve4(int argc, char *argv[])
+void sieve4(int argc, char *argv[], long n)
 {
    long count;          /* Local prime count */
    double elapsed_time; /* Parallel execution time */
@@ -19,7 +19,6 @@ void sieve4(int argc, char *argv[])
    long sec;
    long chunk;
    long lv;
-   long n;     /* Sieving from 2, ..., 'n' */
    int p;      /* Number of processes */
    long prime; /* Current prime */
    long size;  /* Elements in 'marked' */
@@ -33,17 +32,7 @@ void sieve4(int argc, char *argv[])
    // start timer
    elapsed_time = -MPI_Wtime();
 
-   // command line check
-   if (argc != 3)
-   {
-      if (!id)
-         printf("Command line: %s <n> <chunk>\n", argv[0]);
-      MPI_Finalize();
-      exit(1);
-   }
-
    // set basic variables
-   n = atol(argv[1]);
    m = (n - 3) / 2 + 1;
    chunk = atol(argv[2]);
    low_value = 2 * BLOCK_LOW(id, p, m) + 3;
@@ -144,7 +133,7 @@ void sieve4(int argc, char *argv[])
    // results
    if (!id)
    {
-      printf("There are %d primes less than or equal to %ld\n", global_count + 1, n);
+      printf("\nThere are %ld primes less than or equal to %ld\n", global_count + 1, n);
       printf("SIEVE (%d) %10.6f\n", p, elapsed_time);
    }
 

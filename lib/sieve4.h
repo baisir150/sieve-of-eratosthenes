@@ -1,8 +1,8 @@
 #ifndef __SIEVE4_INCLUDED__
 #define __SIEVE4_INCLUDED__
 
-#include "sieve.h"
+#include "../lib/helper.h"
 
-void sieve4(int argc, char *argv[]);
+void sieve4(int argc, char *argv[], long n);
 
 #endif
