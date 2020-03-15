@@ -1,100 +1,111 @@
-#include "mpi.h"
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "sieve1.h"
 
-int main (int argc, char *argv[])
+void sieve1(int argc, char *argv[])
 {
-   long    count;        /* Local prime count */
+   long count;          /* Local prime count */
    double elapsed_time; /* Parallel execution time */
-   long    first;        /* Index of first multiple */
-   long    global_count; /* Global prime count */
-   long    high_value;   /* Highest value on this proc */
-   long    i;
-   int    id;           /* Process ID number */
-   long    index;        /* Index of current prime */
-   long    low_value;    /* Lowest value on this proc */
-   char  *marked;       /* Portion of 2,...,'n' */
-   long    n;            /* Sieving from 2, ..., 'n' */
-   int    p;            /* Number of processes */
-   long    prime;        /* Current prime */
-   long    size;         /* Elements in 'marked' */
+   long first;          /* Index of first multiple */
+   long global_count;   /* Global prime count */
+   long high_value;     /* Highest value on this proc */
+   long i;
+   int id;         /* Process ID number */
+   long index;     /* Index of current prime */
+   long low_value; /* Lowest value on this proc */
+   char *marked;   /* Portion of 2,...,'n' */
+   long n;         /* Sieving from 2, ..., 'n' */
+   int p;          /* Number of processes */
+   long prime;     /* Current prime */
+   long size;      /* Elements in 'marked' */
 
    // initialize mpi
-   MPI_Init (&argc, &argv);
-   MPI_Comm_rank (MPI_COMM_WORLD, &id);
-   MPI_Comm_size (MPI_COMM_WORLD, &p);
-   MPI_Barrier (MPI_COMM_WORLD);
+   MPI_Init(&argc, &argv);
+   MPI_Comm_rank(MPI_COMM_WORLD, &id);
+   MPI_Comm_size(MPI_COMM_WORLD, &p);
+   MPI_Barrier(MPI_COMM_WORLD);
 
    // initialize mpi
    elapsed_time = -MPI_Wtime();
 
    // command line check
-   if (argc != 2) {
-      if (!id) printf ("Command line: %s <m>\n", argv[0]);
+   if (argc != 2)
+   {
+      if (!id)
+         printf("Command line: %s <m>\n", argv[0]);
       MPI_Finalize();
-      exit (1);
+      exit(1);
    }
 
    // set basic variables
    n = atol(argv[1]);
-   low_value = 2 + id*(n-1)/p;
-   high_value = 1 + (id+1)*(n-1)/p;
+   low_value = 2 + id * (n - 1) / p;
+   high_value = 1 + (id + 1) * (n - 1) / p;
    size = high_value - low_value + 1;
 
    // process number max
-   if ((2 + ((n-1)/p)) < (int) sqrt((double) n)) {
-      if (!id) printf ("Too many processes\n");
+   if ((2 + ((n - 1) / p)) < (int)sqrt((double)n))
+   {
+      if (!id)
+         printf("Too many processes\n");
       MPI_Finalize();
-      exit (1);
+      exit(1);
    }
 
    // make array
-   marked = (char *) malloc (size);
-   if (marked == NULL) {
-      printf ("Cannot allocate enough memory\n");
+   marked = (char *)malloc(size);
+   if (marked == NULL)
+   {
+      printf("Cannot allocate enough memory\n");
       MPI_Finalize();
-      exit (1);
+      exit(1);
    }
 
    // initialize array: *marked
-   for (i = 0; i < size; i++) marked[i] = 0;
+   for (i = 0; i < size; i++)
+      marked[i] = 0;
 
    // mark primes
-   if (!id) index = 0;
+   if (!id)
+      index = 0;
    prime = 2;
-   do {
+   do
+   {
       if (prime * prime > low_value)
          first = prime * prime - low_value;
-      else {
-         if (!(low_value % prime)) first = 0;
-         else first = prime - (low_value % prime);
+      else
+      {
+         if (!(low_value % prime))
+            first = 0;
+         else
+            first = prime - (low_value % prime);
       }
-      for (i = first; i < size; i += prime) marked[i] = 1;
-      if (!id) {
-         while (marked[++index]);
+      for (i = first; i < size; i += prime)
+         marked[i] = 1;
+      if (!id)
+      {
+         while (marked[++index])
+            ;
          prime = index + 2;
       }
-      MPI_Bcast (&prime,  1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&prime, 1, MPI_INT, 0, MPI_COMM_WORLD);
    } while (prime * prime <= n);
 
    // count primes
    count = 0;
    for (i = 0; i < size; i++)
-      if (!marked[i]) count++;
+      if (!marked[i])
+         count++;
 
-   MPI_Reduce (&count, &global_count, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+   MPI_Reduce(&count, &global_count, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
    // stop timer
    elapsed_time += MPI_Wtime();
 
    // results
-   if (!id) {
-      printf ("There are %d primes less than or equal to %ld\n", global_count, n);
-      printf ("SIEVE (%d) %10.6f\n", p, elapsed_time);
+   if (!id)
+   {
+      printf("There are %d primes less than or equal to %ld\n", global_count, n);
+      printf("SIEVE (%d) %10.6f\n", p, elapsed_time);
    }
 
-   MPI_Finalize ();
-
-   return 0;
+   MPI_Finalize();
 }
