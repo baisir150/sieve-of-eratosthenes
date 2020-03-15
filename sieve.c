@@ -6,6 +6,6 @@
 
 int main(int argc, char *argv[])
 {
-
+	sieve1(argc, argv);
   return 0;
 }
